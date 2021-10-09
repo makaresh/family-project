@@ -2,13 +2,13 @@ package pet.makaresh.bot.basket.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import pet.makaresh.bot.basket.model.Product;
-import pet.makaresh.bot.basket.model.SavedProduct;
+import org.springframework.web.bind.annotation.*;
+import pet.makaresh.bot.basket.model.BasketProduct;
+import pet.makaresh.bot.basket.model.BasketRequestedProduct;
+import pet.makaresh.bot.basket.model.QuantityProduct;
 import pet.makaresh.bot.basket.repository.ProductsRepository;
+
+import java.util.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,27 +18,32 @@ public class BasketController {
     private final ProductsRepository productsRepository;
 
     @PostMapping("/add")
-    public ResponseEntity<String> addProductToBasket(@RequestBody Product product) {
-        SavedProduct savedProduct = productsRepository.getProduct(product);
-        int addedProduct = productsRepository.addProductToBasket(product);
-        return ResponseEntity.ok(product.getProductName() + " was added");
+    public ResponseEntity<String> addProductToBasket(@RequestBody BasketRequestedProduct basketRequestedProduct) {
+        productsRepository.addToProductList(basketRequestedProduct);
+        return ResponseEntity.ok(basketRequestedProduct.getName() + " was added");
     }
 
-    @PostMapping("/delete")
-    public ResponseEntity<Void> add(@RequestBody Product product) {
-        productsRepository.deleteFromBasket(product);
-        return ResponseEntity.ok().build();
+    @GetMapping("/existed")
+    public ResponseEntity<List<String>> getExistedProductsInBasket() {
+        List<String> productsFromBasket = productsRepository.getSavedProducts();
+        return ResponseEntity.ok(productsFromBasket);
     }
 
-    @PostMapping("/change")
-    public ResponseEntity<Void> changeQuantity(@RequestBody Product product) {
-        productsRepository.updateQuantityProduct(product);
-        return ResponseEntity.ok().build();
+    @GetMapping("/show_list")
+    public ResponseEntity<List<BasketProduct>> showBasketList() {
+        List<BasketProduct> basketList = productsRepository.getBasketList();
+        return ResponseEntity.ok(basketList);
     }
 
-    @PostMapping("/bought")
-    public ResponseEntity<Void> setBought(@RequestBody Product product) {
-        productsRepository.setBought(product);
-        return ResponseEntity.ok().build();
+    @GetMapping("/basket_products")
+    public ResponseEntity<List<String>> getNamesProductsInBasket() {
+        List<String> productsFromBasket = productsRepository.getProductsFromBasket();
+        return ResponseEntity.ok(productsFromBasket);
+    }
+
+    @PostMapping("/update_quantity")
+    public ResponseEntity<Integer> updateProductQuantity(@RequestBody QuantityProduct quantityProduct) {
+        Integer count = productsRepository.updateProductQuantity(quantityProduct);
+        return ResponseEntity.ok(count);
     }
 }

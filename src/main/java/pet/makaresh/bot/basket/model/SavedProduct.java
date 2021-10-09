@@ -13,5 +13,4 @@ import java.util.UUID;
 public class SavedProduct {
     private UUID productId;
     private String productName;
-    private List<Double> allPrices;
 }
