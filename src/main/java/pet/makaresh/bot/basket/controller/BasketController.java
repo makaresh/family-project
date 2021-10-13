@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pet.makaresh.bot.basket.model.BasketProduct;
 import pet.makaresh.bot.basket.model.BasketRequestedProduct;
+import pet.makaresh.bot.basket.model.CommentProduct;
 import pet.makaresh.bot.basket.model.QuantityProduct;
 import pet.makaresh.bot.basket.repository.ProductsRepository;
 
@@ -45,5 +46,17 @@ public class BasketController {
     public ResponseEntity<Integer> updateProductQuantity(@RequestBody QuantityProduct quantityProduct) {
         Integer count = productsRepository.updateProductQuantity(quantityProduct);
         return ResponseEntity.ok(count);
+    }
+
+    @PostMapping("/update_comment")
+    public ResponseEntity<Integer> updateProductComment(@RequestBody CommentProduct commentProduct) {
+        Integer count = productsRepository.updateProductComment(commentProduct);
+        return ResponseEntity.ok(count);
+    }
+
+    @GetMapping("/empty_basket")
+    public ResponseEntity<Void> emptyBasket() {
+        productsRepository.emptyBasket();
+        return ResponseEntity.ok(null);
     }
 }

@@ -5,15 +5,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import pet.makaresh.bot.basket.model.BasketProduct;
-import pet.makaresh.bot.basket.model.BasketRequestedProduct;
-import pet.makaresh.bot.basket.model.QuantityProduct;
-import pet.makaresh.bot.basket.model.SavedProduct;
+import pet.makaresh.bot.basket.model.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
+
+import static org.springframework.transaction.annotation.Propagation.NOT_SUPPORTED;
 
 @Repository
 @RequiredArgsConstructor
@@ -104,10 +103,26 @@ public class ProductsRepository {
         Integer count = 0;
         BasketProduct product = getProduct(quantityProduct.getProductId());
         if (product != null) {
-            Double quantity = quantityProduct.getQuantity() + product.getQuantity();
-            String sql = "update products_basket set quantity = " + quantity + " where product_id = " + quantityProduct.getProductId();
+            Double quantity = ("+".equals(quantityProduct.getSign())) ? quantityProduct.getQuantity() + product.getQuantity() : quantityProduct.getQuantity() - product.getQuantity();
+            String sql = "update products_basket set quantity = " + ((quantity >= 0) ? quantity : 0) + " where product_id = " + quantityProduct.getProductId();
             count = jdbcTemplate.update(sql);
         }
         return count;
+    }
+
+    @Transactional
+    public Integer updateProductComment(CommentProduct commentProduct) {
+        Integer count = 0;
+        BasketProduct product = getProduct(commentProduct.getProductId());
+        if (product != null) {
+            String sql = "update products_basket set comment = " + commentProduct.getComment() + " where product_id = " + commentProduct.getProductId();
+            count = jdbcTemplate.update(sql);
+        }
+        return count;
+    }
+
+    @Transactional(propagation = NOT_SUPPORTED)
+    public void emptyBasket() {
+        jdbcTemplate.execute("truncate table products_basket");
     }
 }
